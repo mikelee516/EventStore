@@ -85,6 +85,7 @@
     <Compile Include="AllCheckpoint.cs" />
     <Compile Include="AllEventsSlice.cs" />
     <Compile Include="Core\GossipSeedEndPointDiscoverer.cs" />
+    <Compile Include="GossipSeed.cs" />
     <Compile Include="Core\NodeEndPoints.cs" />
     <Compile Include="StreamCheckpoint.cs" />
     <Compile Include="ClientAuthenticationFailedEventArgs.cs" />

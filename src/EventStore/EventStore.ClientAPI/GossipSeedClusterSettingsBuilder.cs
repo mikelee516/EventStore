@@ -9,23 +9,47 @@ namespace EventStore.ClientAPI
     /// </summary>
     public class GossipSeedClusterSettingsBuilder
     {
-        private IPEndPoint[] _gossipSeeds;
+        private GossipSeed[] _gossipSeeds;
         private TimeSpan _gossipTimeout = TimeSpan.FromSeconds(1);
         private int _maxDiscoverAttempts = Consts.DefaultMaxClusterDiscoverAttempts;
 
         /// <summary>
-        /// Sets gossip seed endpoints for the client.
+        /// Sets gossip seed endpoints for the client. If you need to use a Host header to
+		/// be able to make HTTP requests to the Event Store, use the overload of this method
+		/// which takes <see cref="GossipSeed" />[] instead.
         /// </summary>
-        /// <param name="gossipSeeds">IPEndPoints representing the endpoints of nodes from which to seed gossip.</param>
-        /// <returns>A <see cref="ClusterSettingsBuilder"/> for further configuration.</returns>
+        /// <param name="gossipSeeds"><see cref="IPEndPoint" />s representing the endpoints of nodes from which to seed gossip.</param>
+        /// <returns>A <see cref="GossipSeedClusterSettingsBuilder"/> for further configuration.</returns>
         /// <exception cref="ArgumentException">If no gossip seeds are specified.</exception>
         public GossipSeedClusterSettingsBuilder SetGossipSeedEndPoints(params IPEndPoint[] gossipSeeds)
         {
             if (gossipSeeds == null || gossipSeeds.Length == 0)
-                throw new ArgumentException("Empty FakeDnsEntries collection.");
-            _gossipSeeds = gossipSeeds;
-            return this;
+                throw new ArgumentException("The array of gossip seeds cannot be null or empty.");
+
+			var seeds = new GossipSeed[gossipSeeds.Length];
+            for (var i = 0; i < gossipSeeds.Length; i++)
+			{
+				var seed = gossipSeeds[i];
+				seeds[i] = new GossipSeed(seed.Address, seed.Port);
+			}
+			_gossipSeeds = seeds;
+			return this;
         }
+
+        /// <summary>
+        /// Sets gossip seed endpoints for the client. 
+        /// </summary>
+        /// <param name="gossipSeeds"><see cref="GossipSeed" />s representing the endpoints of nodes from which to seed gossip.</param>
+        /// <returns>A <see cref="GossipSeedClusterSettingsBuilder"/> for further configuration.</returns>
+        /// <exception cref="ArgumentException">If no gossip seeds are specified.</exception>
+		public GossipSeedClusterSettingsBuilder SetGossipSeedEndPoints(params GossipSeed[] gossipSeeds)
+		{
+			if (gossipSeeds == null || gossipSeeds.Length == 0)
+				throw new ArgumentException("The array of gossip seeds cannot be null or empty.");
+
+			_gossipSeeds = gossipSeeds;
+			return this;
+		}
 
         /// <summary>
         /// Sets the maximum number of attempts for discovery.

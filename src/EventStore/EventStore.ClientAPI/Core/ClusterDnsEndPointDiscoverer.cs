@@ -18,7 +18,7 @@ namespace EventStore.ClientAPI.Core
         private readonly string _clusterDns;
         private readonly int _maxDiscoverAttempts;
         private readonly int _managerExternalHttpPort;
-        private readonly IPEndPoint[] _gossipSeeds;
+        private readonly GossipSeed[] _gossipSeeds;
 
         private readonly HttpAsyncClient _client;
         private ClusterMessages.MemberInfoDto[] _oldGossip;
@@ -28,7 +28,7 @@ namespace EventStore.ClientAPI.Core
                                             string clusterDns,
                                             int maxDiscoverAttempts, 
                                             int managerExternalHttpPort,
-                                            IPEndPoint[] gossipSeeds,
+                                            GossipSeed[] gossipSeeds,
                                             TimeSpan gossipTimeout)
         {
             Ensure.NotNull(log, "log");
@@ -42,7 +42,7 @@ namespace EventStore.ClientAPI.Core
             _client = new HttpAsyncClient(log);
         }
 
-        public Task<NodeEndPoints> DiscoverAsync(IPEndPoint failedTcpEndPoint )
+        public Task<NodeEndPoints> DiscoverAsync(GossipSeed failedTcpEndPoint)
         {
             return Task.Factory.StartNew(() =>
             {
@@ -170,14 +170,14 @@ namespace EventStore.ClientAPI.Core
             }
         }
 
-        private ClusterMessages.ClusterInfoDto TryGetGossipFrom(IPEndPoint endPoint)
+        private ClusterMessages.ClusterInfoDto TryGetGossipFrom(GossipSeed endPoint)
         {
             //_log.Debug("ClusterDnsEndPointDiscoverer: Trying to get gossip from [{0}].", endPoint);
 
             ClusterMessages.ClusterInfoDto result = null;
             var completed = new ManualResetEventSlim(false);
 
-            var url = endPoint.ToHttpUrl("/gossip?format=json");
+            var url = endPoint.Endpoint.ToHttpUrl("/gossip?format=json");
             _client.Get(
                 url,
                 null,
@@ -205,7 +205,7 @@ namespace EventStore.ClientAPI.Core
                 {
                     //_log.Info("Failed to get cluster info from [{0}]: request failed, error: {1}.", endPoint, e.Message);
                     completed.Set();
-                });
+                }, endpoint.HostHeader);
 
             completed.Wait();
             return result;

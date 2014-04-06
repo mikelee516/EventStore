@@ -5,6 +5,6 @@ namespace EventStore.ClientAPI.Core
 {
     internal interface IEndPointDiscoverer
     {
-        Task<NodeEndPoints> DiscoverAsync(IPEndPoint failedTcpEndPoint);
+        Task<NodeEndPoints> DiscoverAsync(GossipSeed failedTcpEndPoint);
     }
 }

@@ -90,7 +90,7 @@ namespace EventStore.ClientAPI.Transport.Http
         }
 
         private void Receive(string method, string url, UserCredentials userCredentials, TimeSpan timeout, 
-                             Action<HttpResponse> onSuccess, Action<Exception> onException)
+                             Action<HttpResponse> onSuccess, Action<Exception> onException, string host = "")
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = method;
@@ -101,6 +101,10 @@ namespace EventStore.ClientAPI.Transport.Http
             request.KeepAlive = true;
             request.Pipelined = true;
 #endif
+
+	    if (!string.IsNullOrWhiteSpace(host))
+		    request.Host = host;
+
             if (userCredentials != null)
                 AddAuthenticationHeader(request, userCredentials);
 
